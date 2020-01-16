@@ -68,10 +68,13 @@ namespace restapi.Controllers
             return timecard;
         }
 
-        [HttpDelete("{id:guid}")]
+        [HttpDelete("{id:guid}/delete")]
+        [Produces(ContentTypes.Transition)]
+        [ProducesResponseType(typeof(Transition), 200)]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public IActionResult Delete(Guid id)
+        [ProducesResponseType(typeof(InvalidStateError), 409)]
+        public IActionResult Delete(Guid id, [FromBody] Deletion deletion)
         {
             logger.LogInformation($"Looking for timesheet {id}");
 
@@ -87,9 +90,15 @@ namespace restapi.Controllers
                 return StatusCode(409, new InvalidStateError() { });
             }
 
+            var transition = new Transition(deletion, TimecardStatus.Deleted);
+
+            logger.LogInformation($"Adding deletion {transition}");
+
+            timecard.Transitions.Add(transition);
+
             repository.Delete(id);
 
-            return Ok();
+            return Ok(transition);
         }
 
         [HttpGet("{id:guid}/lines")]
