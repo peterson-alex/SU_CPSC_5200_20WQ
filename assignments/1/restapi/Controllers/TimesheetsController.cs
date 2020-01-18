@@ -184,9 +184,6 @@ namespace restapi.Controllers
             } 
         }
 
-        // Replace existing timecard line 
-        // [HttpPost("{id:guid}/lines/{id:guid}")]
-
         [HttpPost("{timecardID:guid}/lines/{lineID:guid}")]
         [Produces(ContentTypes.TimesheetLine)]
         [ProducesResponseType(typeof(TimecardLine), 200)]
@@ -208,10 +205,43 @@ namespace restapi.Controllers
                 timecard.DeleteLine(lineID);
 
                 repository.Update(timecard);
-                
+
                 return AddLine(timecardID, replacementLine);
             }
             else {
+                return NotFound(); 
+            }
+        }
+
+        [HttpPatch("{timecardID:guid}/lines/{lineID:guid}")]
+        [Produces(ContentTypes.TimesheetLine)]
+        [ProducesResponseType(typeof(TimecardLine), 200)]
+        [ProducesResponseType(404)]
+        public IActionResult UpdateLine(Guid timecardID, Guid lineID, [FromBody] DocumentLine newLine)
+        {
+            logger.LogInformation($"Looking for timesheet {timecardID}");
+
+            Timecard timecard = repository.Find(timecardID);
+
+            if (timecard == null) {
+                return NotFound(); 
+            }
+
+            logger.LogInformation($"Looking for timecard line {lineID}");
+
+            if (timecard.HasLine(lineID)) {
+                
+                // update each element of line with elements of new line
+                var updatedLine = timecard.UpdateLine(lineID, newLine);
+
+                // update repository 
+                repository.Update(timecard);
+
+                // return newly updated line 
+                return Ok(updatedLine);
+            }
+            else 
+            {
                 return NotFound(); 
             }
         }
