@@ -1,11 +1,23 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using restapi.Models;
+using Microsoft.Extensions.Logging;
 
 namespace restapi.Controllers
 {
     public class RootController : Controller
     {
+        
+        private readonly TimesheetsRepository repository;
+
+        private readonly ILogger logger;
+
+        public RootController(ILogger<RootController> logger)
+        {
+            repository = new TimesheetsRepository();
+            this.logger = logger;
+        }
+        
         // GET api/values
         [Route("~/")]
         [HttpGet]
@@ -31,6 +43,25 @@ namespace restapi.Controllers
                     ApplicationRelationship.Version, "0.1"
                 }
             };
+        }
+
+        [Route("~/")]
+        [HttpPost]
+        [Produces(ContentTypes.Timesheet)]
+        [ProducesResponseType(typeof(Timecard), 200)]
+        public Timecard Create([FromBody] DocumentPerson person)
+        {
+            logger.LogInformation($"Creating timesheet for {person.ToString()}");
+
+            var timecard = new Timecard(person.Id);
+
+            var entered = new Entered() { Person = person.Id };
+
+            timecard.Transitions.Add(new Transition(entered));
+
+            repository.Add(timecard);
+
+            return timecard;
         }
     }
 }
