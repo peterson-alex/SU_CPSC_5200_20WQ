@@ -175,7 +175,7 @@ namespace restapi.Controllers
             if (timecard.HasLine(lineID)) 
             {
                 var line = timecard.Lines.Cast<TimecardLine>().SingleOrDefault(l => l.UniqueIdentifier == lineID);
-                
+
                 return Ok(line);
             }
             else 
@@ -185,8 +185,37 @@ namespace restapi.Controllers
         }
 
         // Replace existing timecard line 
-
         // [HttpPost("{id:guid}/lines/{id:guid}")]
+
+        [HttpPost("{timecardID:guid}/lines/{lineID:guid}")]
+        [Produces(ContentTypes.TimesheetLine)]
+        [ProducesResponseType(typeof(TimecardLine), 200)]
+        [ProducesResponseType(404)]
+        public IActionResult ReplaceLine(Guid timecardID, Guid lineID, [FromBody] DocumentLine replacementLine)
+        {
+            logger.LogInformation($"Looking for timesheet {timecardID}");
+
+            Timecard timecard = repository.Find(timecardID);
+
+            if (timecard == null) {
+                return NotFound(); 
+            }
+
+            logger.LogInformation($"Looking for timecard line {lineID}");
+
+            if (timecard.HasLine(lineID))
+            {
+                timecard.DeleteLine(lineID);
+
+                repository.Update(timecard);
+                
+                return AddLine(timecardID, replacementLine);
+            }
+            else {
+                return NotFound(); 
+            }
+        }
+
 
         [HttpGet("{id:guid}/transitions")]
         [Produces(ContentTypes.Transitions)]

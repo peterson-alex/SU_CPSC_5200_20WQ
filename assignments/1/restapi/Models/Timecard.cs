@@ -185,6 +185,10 @@ namespace restapi.Models
             return annotatedLine;
         }
 
+        public bool DeleteLine(Guid lineID) {
+            return Lines.Remove(Lines.SingleOrDefault(l => l.UniqueIdentifier == lineID)); 
+        }
+
         public bool CanBeDeleted()
         {
             return (Status == TimecardStatus.Cancelled || Status == TimecardStatus.Draft);
