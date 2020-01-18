@@ -68,6 +68,8 @@ namespace restapi.Controllers
             return timecard;
         }
 
+        /* Deletes the timecard identified by the given id
+        from the repository. */
         [HttpDelete("{id:guid}/delete")]
         [Produces(ContentTypes.Transition)]
         [ProducesResponseType(typeof(Transition), 200)]
@@ -155,12 +157,15 @@ namespace restapi.Controllers
             }
         }
 
+        /* Completely replaces timecardline identified by given 
+        id with provided replacement timecardline. */
         [HttpPost("{timecardID:guid}/lines/{lineID:guid}")]
         [Produces(ContentTypes.TimesheetLine)]
         [ProducesResponseType(typeof(TimecardLine), 200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(typeof(InvalidStateError), 409)]
-        public IActionResult ReplaceLine(Guid timecardID, Guid lineID, [FromBody] DocumentLine replacementLine)
+        public IActionResult ReplaceLine(Guid timecardID, Guid lineID, 
+            [FromBody] DocumentLine replacementLine)
         {
             logger.LogInformation($"Looking for timesheet {timecardID}");
 
@@ -190,12 +195,15 @@ namespace restapi.Controllers
             }
         }
 
+        /* Updates timecardline identified by given id with parameters
+        given in new timecardline. */
         [HttpPatch("{timecardID:guid}/lines/{lineID:guid}")]
         [Produces(ContentTypes.TimesheetLine)]
         [ProducesResponseType(typeof(TimecardLine), 200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(typeof(InvalidStateError), 409)]
-        public IActionResult UpdateLine(Guid timecardID, Guid lineID, [FromBody] DocumentLine newLine)
+        public IActionResult UpdateLine(Guid timecardID, Guid lineID, 
+            [FromBody] DocumentLine newLine)
         {
             logger.LogInformation($"Looking for timesheet {timecardID}");
 
