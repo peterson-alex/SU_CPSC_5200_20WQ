@@ -491,6 +491,7 @@ namespace restapi.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(typeof(InvalidStateError), 409)]
         [ProducesResponseType(typeof(EmptyTimecardError), 409)]
+        [ProducesResponseType(typeof(UnauthorizedApprovalError), 409)]
         public IActionResult Approve(Guid id, [FromBody] Approval approval)
         {
             logger.LogInformation($"Looking for timesheet {id}");
@@ -502,6 +503,11 @@ namespace restapi.Controllers
                 if (timecard.Status != TimecardStatus.Submitted)
                 {
                     return StatusCode(409, new InvalidStateError() { });
+                }
+
+                // check if employee and approver are same person 
+                if (approval.Person == timecard.Employee) {
+                    return StatusCode(409, new UnauthorizedApprovalError() { });
                 }
 
                 var transition = new Transition(approval, TimecardStatus.Approved);
