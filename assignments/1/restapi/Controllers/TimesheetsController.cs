@@ -223,6 +223,7 @@ namespace restapi.Controllers
         [Produces(ContentTypes.TimesheetLine)]
         [ProducesResponseType(typeof(TimecardLine), 200)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(typeof(InvalidStateError), 409)]
         public IActionResult UpdateLine(Guid timecardID, Guid lineID, [FromBody] DocumentLine newLine)
         {
             logger.LogInformation($"Looking for timesheet {timecardID}");
@@ -233,17 +234,19 @@ namespace restapi.Controllers
                 return NotFound(); 
             }
 
+            if (timecard.Status != TimecardStatus.Draft)
+            {
+                return StatusCode(409, new InvalidStateError() { });
+            }
+
             logger.LogInformation($"Looking for timecard line {lineID}");
 
             if (timecard.HasLine(lineID)) {
                 
-                // update each element of line with elements of new line
                 var updatedLine = timecard.UpdateLine(lineID, newLine);
 
-                // update repository 
                 repository.Update(timecard);
 
-                // return newly updated line 
                 return Ok(updatedLine);
             }
             else 
