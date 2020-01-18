@@ -188,6 +188,7 @@ namespace restapi.Controllers
         [Produces(ContentTypes.TimesheetLine)]
         [ProducesResponseType(typeof(TimecardLine), 200)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(typeof(InvalidStateError), 409)]
         public IActionResult ReplaceLine(Guid timecardID, Guid lineID, [FromBody] DocumentLine replacementLine)
         {
             logger.LogInformation($"Looking for timesheet {timecardID}");
@@ -196,6 +197,11 @@ namespace restapi.Controllers
 
             if (timecard == null) {
                 return NotFound(); 
+            }
+
+            if (timecard.Status != TimecardStatus.Draft)
+            {
+                return StatusCode(409, new InvalidStateError() { });
             }
 
             logger.LogInformation($"Looking for timecard line {lineID}");
