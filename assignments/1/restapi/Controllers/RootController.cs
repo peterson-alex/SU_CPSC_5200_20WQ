@@ -45,6 +45,7 @@ namespace restapi.Controllers
             };
         }
 
+        /* Creates a new timecard. */
         [Route("~/")]
         [HttpPost]
         [Produces(ContentTypes.Timesheet)]
