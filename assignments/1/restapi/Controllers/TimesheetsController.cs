@@ -155,35 +155,6 @@ namespace restapi.Controllers
             }
         }
 
-        [HttpGet("{timecardID:guid}/lines/{lineID:guid}")]
-        [Produces(ContentTypes.TimesheetLine)]
-        [ProducesResponseType(typeof(TimecardLine), 200)]
-        [ProducesResponseType(404)]
-        public IActionResult GetLine(Guid timecardID, Guid lineID)
-        {
-
-            logger.LogInformation($"Looking for timesheet {timecardID}");
-
-            Timecard timecard = repository.Find(timecardID);
-
-            if (timecard == null) {
-                return NotFound(); 
-            }
-
-            logger.LogInformation($"Looking for timecard line {lineID}");
-
-            if (timecard.HasLine(lineID)) 
-            {
-                var line = timecard.Lines.Cast<TimecardLine>().SingleOrDefault(l => l.UniqueIdentifier == lineID);
-
-                return Ok(line);
-            }
-            else 
-            {
-                return NotFound(); 
-            } 
-        }
-
         [HttpPost("{timecardID:guid}/lines/{lineID:guid}")]
         [Produces(ContentTypes.TimesheetLine)]
         [ProducesResponseType(typeof(TimecardLine), 200)]
